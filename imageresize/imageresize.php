@@ -18,7 +18,7 @@ class ImageResize extends Module
     {
         $this->name = 'imageresize';
         $this->tab = 'administration';
-        $this->version = '2.4.0';
+        $this->version = '2.5.0';
         $this->author = 'Jonathan Guillerm';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [
@@ -38,9 +38,15 @@ class ImageResize extends Module
 
     private function initializeServices()
     {
-        $this->imageProcessorService = new ImageProcessorService();
-        $this->entityImageService = new EntityImageService($this->imageProcessorService);
-        $this->formHelper = new FormHelper($this);
+        if (!$this->imageProcessorService) {
+            $this->imageProcessorService = new ImageProcessorService();
+        }
+        if (!$this->entityImageService) {
+            $this->entityImageService = new EntityImageService($this->imageProcessorService);
+        }
+        if (!$this->formHelper) {
+            $this->formHelper = new FormHelper($this);
+        }
     }
 
     public function install()

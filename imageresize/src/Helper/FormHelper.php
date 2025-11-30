@@ -15,26 +15,27 @@ class FormHelper
 
     public function renderConfigurationForm()
     {
+        $context = Context::getContext();
         $helper = new HelperForm();
 
         $helper->show_toolbar = false;
         $helper->table = $this->module->table;
         $helper->module = $this->module;
-        $helper->default_form_language = $this->module->context->language->id;
+        $helper->default_form_language = (int)$context->language->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
 
         $helper->identifier = $this->module->identifier;
         $helper->submit_action = 'submitImageResize';
-        $helper->currentIndex = $this->module->context->link->getAdminLink('AdminModules', false)
+        $helper->currentIndex = $context->link->getAdminLink('AdminModules', false)
             . '&configure=' . $this->module->name
             . '&tab_module=' . $this->module->tab
             . '&module_name=' . $this->module->name;
         $helper->token = Tools::getAdminTokenLite('AdminModules');
 
         $helper->tpl_vars = [
-            'fields_value' => [],
-            'languages' => $this->module->context->controller->getLanguages(),
-            'id_language' => $this->module->context->language->id,
+            'fields_value' => $this->getConfigFieldsValues(),
+            'languages' => $context->controller->getLanguages(),
+            'id_language' => (int)$context->language->id,
         ];
 
         return $helper->generateForm([$this->getFormStructure()]);
@@ -143,5 +144,13 @@ class FormHelper
         }
 
         return $types;
+    }
+
+    private function getConfigFieldsValues()
+    {
+        return [
+            'image_entity' => Tools::getValue('image_entity', 'products'),
+            'regenerate_all' => Tools::getValue('regenerate_all', 0),
+        ];
     }
 }
