@@ -2,7 +2,7 @@
 <module>
     <name>imageresize</name>
     <displayName><![CDATA[Image Resize]]></displayName>
-    <version><![CDATA[4.1.0]]></version>
+    <version><![CDATA[4.2.0]]></version>
     <description><![CDATA[Redimensionne automatiquement les images selon les param&egrave;tres du th&egrave;me actif]]></description>
     <author><![CDATA[Jonathan Guillerm]]></author>
     <tab><![CDATA[administration]]></tab>

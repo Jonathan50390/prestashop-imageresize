@@ -18,7 +18,7 @@ class ImageResize extends Module
     {
         $this->name = 'imageresize';
         $this->tab = 'administration';
-        $this->version = '4.1.0';
+        $this->version = '4.2.0';
         $this->author = 'Jonathan Guillerm';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [
@@ -79,11 +79,21 @@ class ImageResize extends Module
         $entity = Tools::getValue('image_entity', 'products');
 
         try {
+            $debugInfo = [];
+
+            if ($entity === 'slides') {
+                $debugInfo = $this->getSlideDebugInfo();
+            }
+
             $count = $this->entityImageService->regenerateImagesByEntity($entity);
 
-            return $this->displayConfirmation(
-                sprintf($this->l('%d image(s) redimensionnée(s) avec succès'), $count)
-            );
+            $message = sprintf($this->l('%d image(s) redimensionnée(s) avec succès'), $count);
+
+            if ($entity === 'slides' && !empty($debugInfo)) {
+                $message .= '<br><br><strong>Debug Info:</strong><br>' . implode('<br>', $debugInfo);
+            }
+
+            return $this->displayConfirmation($message);
         } catch (Exception $e) {
             PrestaShopLogger::addLog(
                 'ImageResize: Error processing images - ' . $e->getMessage(),
@@ -97,6 +107,60 @@ class ImageResize extends Module
                 $this->l('Erreur lors du redimensionnement : ') . $e->getMessage()
             );
         }
+    }
+
+    private function getSlideDebugInfo()
+    {
+        $info = [];
+
+        $modulePaths = [
+            ['module' => 'ps_imageslider', 'table' => 'homeslider_slides'],
+            ['module' => 'imageslider', 'table' => 'homeslider'],
+        ];
+
+        foreach ($modulePaths as $config) {
+            $isInstalled = Module::isInstalled($config['module']);
+            $info[] = '• Module ' . $config['module'] . ': ' . ($isInstalled ? '<span style="color:green">Installé</span>' : '<span style="color:red">Non installé</span>');
+
+            if ($isInstalled) {
+                $tableName = _DB_PREFIX_ . $config['table'];
+                $tableExists = Db::getInstance()->executeS("SHOW TABLES LIKE '" . $tableName . "'");
+                $info[] = '  → Table ' . $tableName . ': ' . ($tableExists ? '<span style="color:green">Existe</span>' : '<span style="color:red">N\'existe pas</span>');
+
+                if ($tableExists) {
+                    $slides = Db::getInstance()->executeS('SELECT * FROM ' . $tableName);
+                    $info[] = '  → Nombre de slides: ' . ($slides ? count($slides) : 0);
+
+                    if ($slides) {
+                        $moduleDir = _PS_ROOT_DIR_ . '/modules/';
+                        $possiblePaths = [
+                            $moduleDir . 'ps_imageslider/images/',
+                            $moduleDir . 'imageslider/images/',
+                            $moduleDir . 'blockbanner/img/',
+                            _PS_ROOT_DIR_ . '/img/cms/'
+                        ];
+
+                        foreach ($possiblePaths as $path) {
+                            $exists = file_exists($path);
+                            $info[] = '  → Chemin ' . $path . ': ' . ($exists ? '<span style="color:green">Existe</span>' : '<span style="color:red">N\'existe pas</span>');
+
+                            if ($exists) {
+                                $files = scandir($path);
+                                $imageFiles = array_filter($files, function($f) {
+                                    return preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $f);
+                                });
+                                $info[] = '    → Fichiers images: ' . count($imageFiles);
+                            }
+                        }
+
+                        $firstSlide = $slides[0];
+                        $info[] = '  → Première slide (colonnes): ' . implode(', ', array_keys($firstSlide));
+                    }
+                }
+            }
+        }
+
+        return $info;
     }
 
     public function hookActionAdminControllerSetMedia()
