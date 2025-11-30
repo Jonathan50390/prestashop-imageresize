@@ -4,11 +4,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
-
-use ImageResize\Service\ImageProcessorService;
-use ImageResize\Service\EntityImageService;
-use ImageResize\Helper\FormHelper;
+require_once __DIR__ . '/src/Service/ImageProcessorService.php';
+require_once __DIR__ . '/src/Service/EntityImageService.php';
+require_once __DIR__ . '/src/Helper/FormHelper.php';
 
 class ImageResize extends Module
 {
@@ -20,7 +18,7 @@ class ImageResize extends Module
     {
         $this->name = 'imageresize';
         $this->tab = 'administration';
-        $this->version = '2.3.0';
+        $this->version = '2.4.0';
         $this->author = 'Jonathan Guillerm';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [

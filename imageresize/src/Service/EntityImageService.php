@@ -1,12 +1,8 @@
 <?php
 
-namespace ImageResize\Service;
-
-use Category;
-use Image;
-use ImageType;
-use Manufacturer;
-use Supplier;
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 class EntityImageService
 {
@@ -93,7 +89,7 @@ class EntityImageService
             case 'suppliers':
                 return $this->regenerateSupplierImages();
             default:
-                throw new \Exception('Invalid entity type: ' . $entity);
+                throw new Exception('Invalid entity type: ' . $entity);
         }
     }
 }

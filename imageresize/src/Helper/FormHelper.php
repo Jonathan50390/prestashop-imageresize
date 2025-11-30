@@ -1,11 +1,8 @@
 <?php
 
-namespace ImageResize\Helper;
-
-use Configuration;
-use HelperForm as PrestashopHelperForm;
-use ImageType;
-use Tools;
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 class FormHelper
 {
@@ -18,7 +15,7 @@ class FormHelper
 
     public function renderConfigurationForm()
     {
-        $helper = new PrestashopHelperForm();
+        $helper = new HelperForm();
 
         $helper->show_toolbar = false;
         $helper->table = $this->module->table;

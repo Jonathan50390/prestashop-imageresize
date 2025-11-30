@@ -1,11 +1,8 @@
 <?php
 
-namespace ImageResize\Service;
-
-use Image;
-use ImageManager;
-use ImageType;
-use PrestaShopLogger;
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 class ImageProcessorService
 {
