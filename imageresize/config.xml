@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>imageresize</name>
+    <displayName><![CDATA[Image Resize]]></displayName>
+    <version><![CDATA[2.2.0]]></version>
+    <description><![CDATA[R&eacute;g&eacute;n&egrave;re les images produits selon les types d'images configur&eacute;s]]></description>
+    <author><![CDATA[Jonathan Guillerm]]></author>
+    <tab><![CDATA[administration]]></tab>
+    <confirmUninstall><![CDATA[&Ecirc;tes-vous s&ucirc;r de vouloir d&eacute;sinstaller ce module ?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+    <limited_countries></limited_countries>
+</module>
