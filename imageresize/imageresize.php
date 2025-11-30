@@ -18,7 +18,7 @@ class ImageResize extends Module
     {
         $this->name = 'imageresize';
         $this->tab = 'administration';
-        $this->version = '2.5.0';
+        $this->version = '2.6.0';
         $this->author = 'Jonathan Guillerm';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [
@@ -96,6 +96,12 @@ class ImageResize extends Module
                 $this->l('Erreur lors du redimensionnement : ') . $e->getMessage()
             );
         }
+    }
+
+    public function hookActionAdminControllerSetMedia()
+    {
+        // Hook pour charger des CSS/JS si nécessaire
+        return true;
     }
 
     public function hookActionObjectImageAddAfter($params)
