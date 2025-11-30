@@ -32,8 +32,10 @@ class ImageProcessorService
 
     public function processProductImage(Image $image, array $imageTypes)
     {
+        $imageDir = defined('_PS_PROD_IMG_DIR_') ? _PS_PROD_IMG_DIR_ : _PS_ROOT_DIR_ . '/img/p/';
+
         $sourceFile = $this->findSourceFile(
-            _PS_PROD_IMG_DIR_ . $image->getImgFolder(),
+            $imageDir . $image->getImgFolder(),
             $image->id
         );
 
@@ -42,7 +44,7 @@ class ImageProcessorService
         }
 
         foreach ($imageTypes as $imageType) {
-            $destFile = _PS_PROD_IMG_DIR_ . $image->getImgFolder() . $image->id . '-' .
+            $destFile = $imageDir . $image->getImgFolder() . $image->id . '-' .
                         stripslashes($imageType['name']) . '.jpg';
 
             if (!$this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height'])) {
@@ -62,14 +64,16 @@ class ImageProcessorService
 
     public function processCategoryImage($categoryId, array $imageTypes)
     {
-        $sourceFile = $this->findSourceFile(_PS_CAT_IMG_DIR_, $categoryId);
+        $imageDir = defined('_PS_CAT_IMG_DIR_') ? _PS_CAT_IMG_DIR_ : _PS_ROOT_DIR_ . '/img/c/';
+
+        $sourceFile = $this->findSourceFile($imageDir, $categoryId);
 
         if (!$sourceFile) {
             return false;
         }
 
         foreach ($imageTypes as $imageType) {
-            $destFile = _PS_CAT_IMG_DIR_ . $categoryId . '-' .
+            $destFile = $imageDir . $categoryId . '-' .
                         stripslashes($imageType['name']) . '.jpg';
 
             $this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height']);
@@ -80,14 +84,16 @@ class ImageProcessorService
 
     public function processManufacturerImage($manufacturerId, array $imageTypes)
     {
-        $sourceFile = $this->findSourceFile(_PS_MANU_IMG_DIR_, $manufacturerId);
+        $imageDir = defined('_PS_MANU_IMG_DIR_') ? _PS_MANU_IMG_DIR_ : _PS_ROOT_DIR_ . '/img/m/';
+
+        $sourceFile = $this->findSourceFile($imageDir, $manufacturerId);
 
         if (!$sourceFile) {
             return false;
         }
 
         foreach ($imageTypes as $imageType) {
-            $destFile = _PS_MANU_IMG_DIR_ . $manufacturerId . '-' .
+            $destFile = $imageDir . $manufacturerId . '-' .
                         stripslashes($imageType['name']) . '.jpg';
 
             $this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height']);
@@ -98,14 +104,16 @@ class ImageProcessorService
 
     public function processSupplierImage($supplierId, array $imageTypes)
     {
-        $sourceFile = $this->findSourceFile(_PS_SUPP_IMG_DIR_, $supplierId);
+        $imageDir = defined('_PS_SUPP_IMG_DIR_') ? _PS_SUPP_IMG_DIR_ : _PS_ROOT_DIR_ . '/img/su/';
+
+        $sourceFile = $this->findSourceFile($imageDir, $supplierId);
 
         if (!$sourceFile) {
             return false;
         }
 
         foreach ($imageTypes as $imageType) {
-            $destFile = _PS_SUPP_IMG_DIR_ . $supplierId . '-' .
+            $destFile = $imageDir . $supplierId . '-' .
                         stripslashes($imageType['name']) . '.jpg';
 
             $this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height']);
