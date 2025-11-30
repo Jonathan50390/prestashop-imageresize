@@ -18,13 +18,14 @@ class ImageResize extends Module
     {
         $this->name = 'imageresize';
         $this->tab = 'administration';
-        $this->version = '2.7.0';
+        $this->version = '3.0.0';
         $this->author = 'Jonathan Guillerm';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [
             'min' => '8.0.0',
             'max' => '9.99.99'
         ];
+        $this->module_key = '';
         $this->bootstrap = true;
 
         parent::__construct();

@@ -16,6 +16,11 @@ class FormHelper
     public function renderConfigurationForm()
     {
         $context = Context::getContext();
+
+        if (!$context) {
+            return $this->module->displayError($this->module->l('Erreur: Context non disponible'));
+        }
+
         $helper = new HelperForm();
 
         $helper->show_toolbar = false;
@@ -23,7 +28,7 @@ class FormHelper
         $helper->module = $this->module;
 
         $languageId = (int)Configuration::get('PS_LANG_DEFAULT');
-        if (isset($context->language) && $context->language) {
+        if (isset($context->language) && $context->language && isset($context->language->id)) {
             $languageId = (int)$context->language->id;
         }
 
@@ -32,15 +37,26 @@ class FormHelper
 
         $helper->identifier = $this->module->identifier;
         $helper->submit_action = 'submitImageResize';
-        $helper->currentIndex = $context->link->getAdminLink('AdminModules', false)
-            . '&configure=' . $this->module->name
-            . '&tab_module=' . $this->module->tab
-            . '&module_name=' . $this->module->name;
+
+        if (isset($context->link)) {
+            $helper->currentIndex = $context->link->getAdminLink('AdminModules', false)
+                . '&configure=' . $this->module->name
+                . '&tab_module=' . $this->module->tab
+                . '&module_name=' . $this->module->name;
+        }
+
         $helper->token = Tools::getAdminTokenLite('AdminModules');
+
+        $languages = [];
+        if (isset($context->controller) && method_exists($context->controller, 'getLanguages')) {
+            $languages = $context->controller->getLanguages();
+        } else {
+            $languages = Language::getLanguages(false);
+        }
 
         $helper->tpl_vars = [
             'fields_value' => $this->getConfigFieldsValues(),
-            'languages' => $context->controller->getLanguages(),
+            'languages' => $languages,
             'id_language' => $languageId,
         ];
 
