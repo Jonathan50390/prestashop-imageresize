@@ -149,24 +149,58 @@ class ImageProcessorService
         $possiblePaths = [
             $moduleDir . 'ps_imageslider/images/',
             $moduleDir . 'imageslider/images/',
-            $moduleDir . 'blockbanner/img/'
+            $moduleDir . 'blockbanner/img/',
+            _PS_ROOT_DIR_ . '/img/cms/'
         ];
 
         $sourceFile = null;
         $imageDir = null;
 
+        PrestaShopLogger::addLog(
+            'ImageResize: Looking for slide image: ' . $imageFile,
+            1,
+            null,
+            'ImageResize'
+        );
+
         foreach ($possiblePaths as $path) {
+            PrestaShopLogger::addLog(
+                'ImageResize: Checking path: ' . $path,
+                1,
+                null,
+                'ImageResize'
+            );
+
             if (file_exists($path)) {
                 $testFile = $path . $imageFile;
+                PrestaShopLogger::addLog(
+                    'ImageResize: Testing file: ' . $testFile . ' - Exists: ' . (file_exists($testFile) ? 'YES' : 'NO'),
+                    1,
+                    null,
+                    'ImageResize'
+                );
+
                 if (file_exists($testFile)) {
                     $sourceFile = $testFile;
                     $imageDir = $path;
+                    PrestaShopLogger::addLog(
+                        'ImageResize: Found slide image at: ' . $sourceFile,
+                        1,
+                        null,
+                        'ImageResize'
+                    );
                     break;
                 }
             }
         }
 
         if (!$sourceFile || !$imageDir) {
+            PrestaShopLogger::addLog(
+                'ImageResize: Slide image not found: ' . $imageFile,
+                2,
+                null,
+                'ImageResize'
+            );
             return false;
         }
 
@@ -182,7 +216,14 @@ class ImageProcessorService
 
         foreach ($imageTypes as $imageType) {
             $destFile = $imageDir . $filename . '-' . $imageType['name'] . '.' . $extension;
-            $this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height'], $extension);
+            if ($this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height'], $extension)) {
+                PrestaShopLogger::addLog(
+                    'ImageResize: Created slide: ' . basename($destFile),
+                    1,
+                    null,
+                    'ImageResize'
+                );
+            }
         }
 
         return true;
