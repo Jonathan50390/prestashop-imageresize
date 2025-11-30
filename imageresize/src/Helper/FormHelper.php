@@ -24,7 +24,7 @@ class FormHelper
         $helper = new HelperForm();
 
         $helper->show_toolbar = false;
-        $helper->table = $this->module->table;
+        $helper->table = $this->module->name;
         $helper->module = $this->module;
 
         $languageId = (int)Configuration::get('PS_LANG_DEFAULT');
@@ -35,13 +35,13 @@ class FormHelper
         $helper->default_form_language = $languageId;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
 
-        $helper->identifier = $this->module->identifier;
+        $helper->identifier = $this->module->name;
         $helper->submit_action = 'submitImageResize';
 
         if (isset($context->link)) {
             $helper->currentIndex = $context->link->getAdminLink('AdminModules', false)
                 . '&configure=' . $this->module->name
-                . '&tab_module=' . $this->module->tab
+                . '&tab_module=administration'
                 . '&module_name=' . $this->module->name;
         }
 
