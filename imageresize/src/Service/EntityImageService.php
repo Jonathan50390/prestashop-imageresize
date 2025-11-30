@@ -97,29 +97,67 @@ class EntityImageService
         $count = 0;
 
         if (Module::isInstalled('ps_imageslider')) {
-            $slides = Db::getInstance()->executeS(
-                'SELECT hs.id_homeslider_slides, hsl.image_url, hsl.image
-                 FROM ' . _DB_PREFIX_ . 'homeslider_slides hs
-                 LEFT JOIN ' . _DB_PREFIX_ . 'homeslider_slides_lang hsl
-                 ON hs.id_homeslider_slides = hsl.id_homeslider_slides
-                 WHERE hsl.image_url IS NOT NULL OR hsl.image IS NOT NULL
-                 GROUP BY hs.id_homeslider_slides'
+            $langTableExists = Db::getInstance()->executeS(
+                "SHOW TABLES LIKE '" . _DB_PREFIX_ . "homeslider_slides_lang'"
             );
 
-            if ($slides) {
-                PrestaShopLogger::addLog(
-                    'ImageResize: Found ' . count($slides) . ' slides in ps_imageslider',
-                    1,
-                    null,
-                    'ImageResize'
+            if ($langTableExists) {
+                $columns = Db::getInstance()->executeS(
+                    "SHOW COLUMNS FROM " . _DB_PREFIX_ . "homeslider_slides_lang"
                 );
 
-                foreach ($slides as $slide) {
-                    $imageFile = !empty($slide['image']) ? $slide['image'] : (!empty($slide['image_url']) ? basename($slide['image_url']) : null);
+                $columnNames = array_column($columns, 'Field');
+                $hasImageUrl = in_array('image_url', $columnNames);
+                $hasImage = in_array('image', $columnNames);
 
-                    if ($imageFile) {
-                        if ($this->imageProcessor->processSlideImage($slide['id_homeslider_slides'], $imageFile)) {
-                            $count++;
+                $selectFields = 'hs.id_homeslider_slides';
+                if ($hasImage) {
+                    $selectFields .= ', hsl.image';
+                }
+                if ($hasImageUrl) {
+                    $selectFields .= ', hsl.image_url';
+                }
+
+                $whereConditions = [];
+                if ($hasImage) {
+                    $whereConditions[] = 'hsl.image IS NOT NULL';
+                }
+                if ($hasImageUrl) {
+                    $whereConditions[] = 'hsl.image_url IS NOT NULL';
+                }
+
+                $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' OR ', $whereConditions) : '';
+
+                $slides = Db::getInstance()->executeS(
+                    "SELECT {$selectFields}
+                     FROM " . _DB_PREFIX_ . "homeslider_slides hs
+                     LEFT JOIN " . _DB_PREFIX_ . "homeslider_slides_lang hsl
+                     ON hs.id_homeslider_slides = hsl.id_homeslider_slides
+                     {$whereClause}
+                     GROUP BY hs.id_homeslider_slides"
+                );
+
+                if ($slides) {
+                    PrestaShopLogger::addLog(
+                        'ImageResize: Found ' . count($slides) . ' slides in ps_imageslider',
+                        1,
+                        null,
+                        'ImageResize'
+                    );
+
+                    foreach ($slides as $slide) {
+                        $imageFile = null;
+
+                        if ($hasImage && !empty($slide['image'])) {
+                            $imageFile = $slide['image'];
+                        } elseif ($hasImageUrl && !empty($slide['image_url'])) {
+                            $imageFile = basename($slide['image_url']);
+                        }
+
+                        if ($imageFile) {
+                            if ($this->imageProcessor->processSlideImage($slide['id_homeslider_slides'], $imageFile)) {
+                                $count++;
+                            }
                         }
                     }
                 }

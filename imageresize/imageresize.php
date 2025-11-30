@@ -18,7 +18,7 @@ class ImageResize extends Module
     {
         $this->name = 'imageresize';
         $this->tab = 'administration';
-        $this->version = '5.0.0';
+        $this->version = '5.1.0';
         $this->author = 'Jonathan Guillerm';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [
@@ -144,14 +144,29 @@ class ImageResize extends Module
                         $langSlides = Db::getInstance()->executeS('SELECT * FROM ' . $langTableName . ' LIMIT 1');
                         if ($langSlides) {
                             $firstLangSlide = $langSlides[0];
-                            $info[] = '  → Colonnes table langues: ' . implode(', ', array_keys($firstLangSlide));
-                        }
+                            $columns = array_keys($firstLangSlide);
+                            $info[] = '  → Colonnes table langues: ' . implode(', ', $columns);
 
-                        $slidesWithImages = Db::getInstance()->executeS(
-                            'SELECT COUNT(*) as total FROM ' . $langTableName . '
-                             WHERE image IS NOT NULL OR image_url IS NOT NULL'
-                        );
-                        $info[] = '  → Slides avec images: ' . $slidesWithImages[0]['total'];
+                            $hasImage = in_array('image', $columns);
+                            $hasImageUrl = in_array('image_url', $columns);
+
+                            $whereConditions = [];
+                            if ($hasImage) {
+                                $whereConditions[] = 'image IS NOT NULL';
+                            }
+                            if ($hasImageUrl) {
+                                $whereConditions[] = 'image_url IS NOT NULL';
+                            }
+
+                            if (!empty($whereConditions)) {
+                                $whereClause = implode(' OR ', $whereConditions);
+                                $slidesWithImages = Db::getInstance()->executeS(
+                                    'SELECT COUNT(*) as total FROM ' . $langTableName . '
+                                     WHERE ' . $whereClause
+                                );
+                                $info[] = '  → Slides avec images: ' . $slidesWithImages[0]['total'];
+                            }
+                        }
                     }
 
                     $allSlides = Db::getInstance()->executeS('SELECT COUNT(*) as total FROM ' . $tableName);
