@@ -96,66 +96,60 @@ class EntityImageService
     {
         $count = 0;
 
-        $modulePaths = [
-            ['module' => 'ps_imageslider', 'table' => 'homeslider_slides', 'id_field' => 'id_homeslider_slides', 'img_field' => 'image'],
-            ['module' => 'imageslider', 'table' => 'homeslider', 'id_field' => 'id_homeslider_slides', 'img_field' => 'image'],
-        ];
+        if (Module::isInstalled('ps_imageslider')) {
+            $slides = Db::getInstance()->executeS(
+                'SELECT hs.id_homeslider_slides, hsl.image_url, hsl.image
+                 FROM ' . _DB_PREFIX_ . 'homeslider_slides hs
+                 LEFT JOIN ' . _DB_PREFIX_ . 'homeslider_slides_lang hsl
+                 ON hs.id_homeslider_slides = hsl.id_homeslider_slides
+                 WHERE hsl.image_url IS NOT NULL OR hsl.image IS NOT NULL
+                 GROUP BY hs.id_homeslider_slides'
+            );
 
-        foreach ($modulePaths as $config) {
-            if (Module::isInstalled($config['module'])) {
-                $tableName = _DB_PREFIX_ . $config['table'];
-
-                $tableExists = Db::getInstance()->executeS(
-                    "SHOW TABLES LIKE '" . $tableName . "'"
+            if ($slides) {
+                PrestaShopLogger::addLog(
+                    'ImageResize: Found ' . count($slides) . ' slides in ps_imageslider',
+                    1,
+                    null,
+                    'ImageResize'
                 );
 
-                if (!$tableExists) {
-                    PrestaShopLogger::addLog(
-                        'ImageResize: Table ' . $tableName . ' not found',
-                        1,
-                        null,
-                        'ImageResize'
-                    );
-                    continue;
-                }
+                foreach ($slides as $slide) {
+                    $imageFile = !empty($slide['image']) ? $slide['image'] : (!empty($slide['image_url']) ? basename($slide['image_url']) : null);
 
-                $slides = Db::getInstance()->executeS(
-                    'SELECT * FROM ' . $tableName
-                );
-
-                if ($slides) {
-                    PrestaShopLogger::addLog(
-                        'ImageResize: Found ' . count($slides) . ' slides in ' . $config['module'],
-                        1,
-                        null,
-                        'ImageResize'
-                    );
-
-                    foreach ($slides as $slide) {
-                        $imageField = isset($slide[$config['img_field']]) ? $slide[$config['img_field']] : null;
-                        $idField = isset($slide[$config['id_field']]) ? $slide[$config['id_field']] : null;
-
-                        if ($imageField && $idField) {
-                            if ($this->imageProcessor->processSlideImage($idField, $imageField)) {
-                                $count++;
-                            }
+                    if ($imageFile) {
+                        if ($this->imageProcessor->processSlideImage($slide['id_homeslider_slides'], $imageFile)) {
+                            $count++;
                         }
                     }
-                } else {
-                    PrestaShopLogger::addLog(
-                        'ImageResize: No slides found in ' . $config['module'],
-                        1,
-                        null,
-                        'ImageResize'
-                    );
                 }
-                break;
+            }
+        } elseif (Module::isInstalled('imageslider')) {
+            $slides = Db::getInstance()->executeS(
+                'SELECT id_homeslider_slides, image FROM ' . _DB_PREFIX_ . 'homeslider'
+            );
+
+            if ($slides) {
+                PrestaShopLogger::addLog(
+                    'ImageResize: Found ' . count($slides) . ' slides in imageslider',
+                    1,
+                    null,
+                    'ImageResize'
+                );
+
+                foreach ($slides as $slide) {
+                    if (!empty($slide['image'])) {
+                        if ($this->imageProcessor->processSlideImage($slide['id_homeslider_slides'], $slide['image'])) {
+                            $count++;
+                        }
+                    }
+                }
             }
         }
 
         if ($count === 0) {
             PrestaShopLogger::addLog(
-                'ImageResize: No slide images were processed. Check if ps_imageslider or imageslider is installed.',
+                'ImageResize: No slide images were processed.',
                 2,
                 null,
                 'ImageResize'

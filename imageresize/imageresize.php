@@ -18,7 +18,7 @@ class ImageResize extends Module
     {
         $this->name = 'imageresize';
         $this->tab = 'administration';
-        $this->version = '4.2.0';
+        $this->version = '5.0.0';
         $this->author = 'Jonathan Guillerm';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [
@@ -128,33 +128,58 @@ class ImageResize extends Module
                 $info[] = '  → Table ' . $tableName . ': ' . ($tableExists ? '<span style="color:green">Existe</span>' : '<span style="color:red">N\'existe pas</span>');
 
                 if ($tableExists) {
-                    $slides = Db::getInstance()->executeS('SELECT * FROM ' . $tableName);
-                    $info[] = '  → Nombre de slides: ' . ($slides ? count($slides) : 0);
+                    $slides = Db::getInstance()->executeS('SELECT * FROM ' . $tableName . ' LIMIT 1');
 
                     if ($slides) {
-                        $moduleDir = _PS_ROOT_DIR_ . '/modules/';
-                        $possiblePaths = [
-                            $moduleDir . 'ps_imageslider/images/',
-                            $moduleDir . 'imageslider/images/',
-                            $moduleDir . 'blockbanner/img/',
-                            _PS_ROOT_DIR_ . '/img/cms/'
-                        ];
+                        $firstSlide = $slides[0];
+                        $info[] = '  → Colonnes table principale: ' . implode(', ', array_keys($firstSlide));
+                    }
 
-                        foreach ($possiblePaths as $path) {
-                            $exists = file_exists($path);
-                            $info[] = '  → Chemin ' . $path . ': ' . ($exists ? '<span style="color:green">Existe</span>' : '<span style="color:red">N\'existe pas</span>');
+                    $langTableName = $tableName . '_lang';
+                    $langTableExists = Db::getInstance()->executeS("SHOW TABLES LIKE '" . $langTableName . "'");
 
-                            if ($exists) {
-                                $files = scandir($path);
-                                $imageFiles = array_filter($files, function($f) {
-                                    return preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $f);
-                                });
-                                $info[] = '    → Fichiers images: ' . count($imageFiles);
-                            }
+                    if ($langTableExists) {
+                        $info[] = '  → Table ' . $langTableName . ': <span style="color:green">Existe</span>';
+
+                        $langSlides = Db::getInstance()->executeS('SELECT * FROM ' . $langTableName . ' LIMIT 1');
+                        if ($langSlides) {
+                            $firstLangSlide = $langSlides[0];
+                            $info[] = '  → Colonnes table langues: ' . implode(', ', array_keys($firstLangSlide));
                         }
 
-                        $firstSlide = $slides[0];
-                        $info[] = '  → Première slide (colonnes): ' . implode(', ', array_keys($firstSlide));
+                        $slidesWithImages = Db::getInstance()->executeS(
+                            'SELECT COUNT(*) as total FROM ' . $langTableName . '
+                             WHERE image IS NOT NULL OR image_url IS NOT NULL'
+                        );
+                        $info[] = '  → Slides avec images: ' . $slidesWithImages[0]['total'];
+                    }
+
+                    $allSlides = Db::getInstance()->executeS('SELECT COUNT(*) as total FROM ' . $tableName);
+                    $info[] = '  → Nombre total de slides: ' . $allSlides[0]['total'];
+
+                    $moduleDir = _PS_ROOT_DIR_ . '/modules/';
+                    $possiblePaths = [
+                        $moduleDir . 'ps_imageslider/images/',
+                        $moduleDir . 'imageslider/images/',
+                        $moduleDir . 'blockbanner/img/',
+                        _PS_ROOT_DIR_ . '/img/cms/'
+                    ];
+
+                    foreach ($possiblePaths as $path) {
+                        $exists = file_exists($path);
+                        $info[] = '  → Chemin ' . $path . ': ' . ($exists ? '<span style="color:green">Existe</span>' : '<span style="color:red">N\'existe pas</span>');
+
+                        if ($exists) {
+                            $files = scandir($path);
+                            $imageFiles = array_filter($files, function($f) {
+                                return preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $f);
+                            });
+                            $info[] = '    → Fichiers images: ' . count($imageFiles);
+
+                            if (count($imageFiles) > 0 && count($imageFiles) <= 5) {
+                                $info[] = '    → Fichiers: ' . implode(', ', array_slice($imageFiles, 0, 5));
+                            }
+                        }
                     }
                 }
             }
