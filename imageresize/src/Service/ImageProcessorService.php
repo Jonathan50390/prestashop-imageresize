@@ -121,4 +121,70 @@ class ImageProcessorService
 
         return true;
     }
+
+    public function processStoreImage($storeId, array $imageTypes)
+    {
+        $imageDir = defined('_PS_STORE_IMG_DIR_') ? _PS_STORE_IMG_DIR_ : _PS_ROOT_DIR_ . '/img/st/';
+
+        $sourceFile = $this->findSourceFile($imageDir, $storeId);
+
+        if (!$sourceFile) {
+            return false;
+        }
+
+        foreach ($imageTypes as $imageType) {
+            $destFile = $imageDir . $storeId . '-' .
+                        stripslashes($imageType['name']) . '.jpg';
+
+            $this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height']);
+        }
+
+        return true;
+    }
+
+    public function processSlideImage($slideId, $imageFile)
+    {
+        $moduleDir = _PS_ROOT_DIR_ . '/modules/';
+
+        $possiblePaths = [
+            $moduleDir . 'ps_imageslider/images/',
+            $moduleDir . 'imageslider/images/',
+            $moduleDir . 'blockbanner/img/'
+        ];
+
+        $sourceFile = null;
+        $imageDir = null;
+
+        foreach ($possiblePaths as $path) {
+            if (file_exists($path)) {
+                $testFile = $path . $imageFile;
+                if (file_exists($testFile)) {
+                    $sourceFile = $testFile;
+                    $imageDir = $path;
+                    break;
+                }
+            }
+        }
+
+        if (!$sourceFile || !$imageDir) {
+            return false;
+        }
+
+        $imageTypes = [
+            ['width' => 1920, 'height' => 600, 'name' => 'slider_lg'],
+            ['width' => 1200, 'height' => 450, 'name' => 'slider_md'],
+            ['width' => 768, 'height' => 350, 'name' => 'slider_sm'],
+            ['width' => 576, 'height' => 250, 'name' => 'slider_xs']
+        ];
+
+        $filename = pathinfo($imageFile, PATHINFO_FILENAME);
+        $extension = pathinfo($imageFile, PATHINFO_EXTENSION);
+
+        foreach ($imageTypes as $imageType) {
+            $destFile = $imageDir . $filename . '-' . $imageType['name'] . '.' . $extension;
+            $this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height'], $extension);
+        }
+
+        return true;
+    }
 }

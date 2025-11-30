@@ -117,6 +117,8 @@ class FormHelper
             ['id' => 'categories', 'name' => $this->module->l('Catégories')],
             ['id' => 'manufacturers', 'name' => $this->module->l('Fabricants')],
             ['id' => 'suppliers', 'name' => $this->module->l('Fournisseurs')],
+            ['id' => 'stores', 'name' => $this->module->l('Boutiques')],
+            ['id' => 'slides', 'name' => $this->module->l('Slides (Carrousel)')],
         ];
     }
 
@@ -151,7 +153,7 @@ class FormHelper
     private function getThemeImageTypes()
     {
         $types = [];
-        $entities = ['products', 'categories', 'manufacturers', 'suppliers'];
+        $entities = ['products', 'categories', 'manufacturers', 'suppliers', 'stores'];
 
         foreach ($entities as $entity) {
             $imageTypes = ImageType::getImagesTypes($entity);
