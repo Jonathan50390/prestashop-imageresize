@@ -21,7 +21,13 @@ class FormHelper
         $helper->show_toolbar = false;
         $helper->table = $this->module->table;
         $helper->module = $this->module;
-        $helper->default_form_language = (int)$context->language->id;
+
+        $languageId = (int)Configuration::get('PS_LANG_DEFAULT');
+        if (isset($context->language) && $context->language) {
+            $languageId = (int)$context->language->id;
+        }
+
+        $helper->default_form_language = $languageId;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG', 0);
 
         $helper->identifier = $this->module->identifier;
@@ -35,7 +41,7 @@ class FormHelper
         $helper->tpl_vars = [
             'fields_value' => $this->getConfigFieldsValues(),
             'languages' => $context->controller->getLanguages(),
-            'id_language' => (int)$context->language->id,
+            'id_language' => $languageId,
         ];
 
         return $helper->generateForm([$this->getFormStructure()]);
