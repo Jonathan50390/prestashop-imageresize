@@ -205,10 +205,10 @@ class ImageProcessorService
         }
 
         $imageTypes = [
-            ['width' => 1920, 'height' => 600, 'name' => 'slider_lg'],
-            ['width' => 1200, 'height' => 450, 'name' => 'slider_md'],
-            ['width' => 768, 'height' => 350, 'name' => 'slider_sm'],
-            ['width' => 576, 'height' => 250, 'name' => 'slider_xs']
+            ['width' => 1110, 'height' => 340, 'name' => 'homeslider'],
+            ['width' => 992, 'height' => 304, 'name' => 'homeslider_tablet'],
+            ['width' => 768, 'height' => 235, 'name' => 'homeslider_mobile'],
+            ['width' => 576, 'height' => 176, 'name' => 'homeslider_xs']
         ];
 
         $filename = pathinfo($imageFile, PATHINFO_FILENAME);
