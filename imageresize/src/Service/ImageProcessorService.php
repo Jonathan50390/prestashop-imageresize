@@ -214,8 +214,22 @@ class ImageProcessorService
         $filename = pathinfo($imageFile, PATHINFO_FILENAME);
         $extension = pathinfo($imageFile, PATHINFO_EXTENSION);
 
+        PrestaShopLogger::addLog(
+            'ImageResize: Creating 4 versions from: ' . $imageFile . ' (basename: ' . $filename . ')',
+            1,
+            null,
+            'ImageResize'
+        );
+
         foreach ($imageTypes as $imageType) {
             $destFile = $imageDir . $filename . '-' . $imageType['name'] . '.' . $extension;
+
+            PrestaShopLogger::addLog(
+                'ImageResize: Creating file: ' . basename($destFile) . ' (' . $imageType['width'] . 'x' . $imageType['height'] . ')',
+                1,
+                null,
+                'ImageResize'
+            );
             if ($this->resizeImage($sourceFile, $destFile, $imageType['width'], $imageType['height'], $extension)) {
                 PrestaShopLogger::addLog(
                     'ImageResize: Created slide: ' . basename($destFile),

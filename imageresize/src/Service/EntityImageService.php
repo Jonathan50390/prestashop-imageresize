@@ -155,6 +155,13 @@ class EntityImageService
                         }
 
                         if ($imageFile) {
+                            PrestaShopLogger::addLog(
+                                'ImageResize: Processing slide ID ' . $slide['id_homeslider_slides'] . ' with image: ' . $imageFile,
+                                1,
+                                null,
+                                'ImageResize'
+                            );
+
                             if ($this->imageProcessor->processSlideImage($slide['id_homeslider_slides'], $imageFile)) {
                                 $count++;
                             }
