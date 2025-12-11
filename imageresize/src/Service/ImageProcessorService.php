@@ -214,8 +214,22 @@ class ImageProcessorService
         $filename = pathinfo($imageFile, PATHINFO_FILENAME);
         $extension = pathinfo($imageFile, PATHINFO_EXTENSION);
 
+        // Si pas d'extension détectée, détecter à partir du fichier réel
+        if (empty($extension)) {
+            $imageInfo = @getimagesize($sourceFile);
+            if ($imageInfo !== false) {
+                $extension = image_type_to_extension($imageInfo[2], false);
+                PrestaShopLogger::addLog(
+                    'ImageResize: Extension detected from file content: ' . $extension,
+                    1,
+                    null,
+                    'ImageResize'
+                );
+            }
+        }
+
         PrestaShopLogger::addLog(
-            'ImageResize: Creating 4 versions from: ' . $imageFile . ' (basename: ' . $filename . ')',
+            'ImageResize: Creating 4 versions from: ' . $imageFile . ' (basename: ' . $filename . ', ext: ' . $extension . ')',
             1,
             null,
             'ImageResize'
